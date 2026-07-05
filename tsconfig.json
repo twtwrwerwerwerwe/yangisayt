@@ -15,8 +15,6 @@
 
     "moduleResolution": "node",
 
-    "ignoreDeprecations": "6.0",
-
     "declaration": false,
     "sourceMap": false,
     "noUnusedLocals": false,
