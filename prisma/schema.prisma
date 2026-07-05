@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SeatType {
+  FRONT
+  MIDDLE
+  BACK
+}
+
+enum OrderType {
+  PASSENGER
+  PARCEL
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model HeroSlide {
+  id        String   @id @default(uuid())
+  titleUz   String
+  titleRu   String
+  titleEn   String
+  image     String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Route {
+  id                String   @id @default(uuid())
+  nameUz            String
+  nameRu            String
+  nameEn            String
+  image             String
+  frontSeatPrice    Int
+  middleSeatPrice   Int
+  backSeatPrice     Int
+  parcelPrice       Int
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  orders            Order[]
+}
+
+model Driver {
+  id             String   @id @default(uuid())
+  fullName       String
+  photo          String
+  carName        String
+  experience     Int
+  phone          String
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  applicationId  String?  @unique
+  application    DriverApplication? @relation(fields: [applicationId], references: [id])
+}
+
+model DriverApplication {
+  id            String             @id @default(uuid())
+  fullName      String
+  carPhotos     String[]
+  carName       String
+  experience    Int
+  phone         String
+  receiptImage  String?
+  receiptPdf    String?
+  status        ApplicationStatus  @default(PENDING)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  driver        Driver?
+}
+
+model Promotion {
+  id          String   @id @default(uuid())
+  titleUz     String
+  titleRu     String
+  titleEn     String
+  descriptionUz String
+  descriptionRu String
+  descriptionEn String
+  image       String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+  id              String     @id @default(uuid())
+  type            OrderType
+  routeId         String
+  route           Route      @relation(fields: [routeId], references: [id])
+  seatType        SeatType?
+  passengerCount  Int?
+  luggage         Boolean?
+  departureTime   String?
+  name            String
+  phone           String
+  latitude        Float?
+  longitude       Float?
+  price           Int
+  createdAt       DateTime   @default(now())
+}
+
+// Since Order rows are deleted after forwarding to Telegram (per spec, to avoid DB overflow),
+// this single-row table keeps a running lifetime counter for the admin dashboard statistics.
+model Counter {
+  id          String @id @default("global")
+  totalOrders Int    @default(0)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  titleUz   String
+  titleRu   String
+  titleEn   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
