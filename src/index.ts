@@ -28,9 +28,22 @@ app.use(
     crossOriginResourcePolicy: false,
   })
 );
+// CLIENT_URL can be a single origin or a comma-separated list, e.g.:
+// CLIENT_URL=http://localhost:5173,https://your-app.netlify.app
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin(origin, callback) {
+      // Allow non-browser requests (curl, server-to-server, Postman) which send no Origin header
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      console.warn(`[CORS] Blocked request from unlisted origin: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );

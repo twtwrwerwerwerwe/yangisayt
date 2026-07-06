@@ -20,13 +20,14 @@ router.get("/", async (req, res, next) => {
 
 router.post("/", requireAuth, uploadDriverPhoto, async (req, res, next) => {
   try {
-    const { fullName, carName, experience, phone } = req.body;
+    const { fullName, carName, experience, phone, rating } = req.body;
     const driver = await prisma.driver.create({
       data: {
         fullName,
         carName,
         experience: Number(experience),
         phone,
+        rating: rating !== undefined ? Number(rating) : 5,
         photo: req.file ? `/uploads/drivers/${req.file.filename}` : "",
       },
     });
@@ -38,12 +39,13 @@ router.post("/", requireAuth, uploadDriverPhoto, async (req, res, next) => {
 
 router.put("/:id", requireAuth, uploadDriverPhoto, async (req, res, next) => {
   try {
-    const { fullName, carName, experience, phone, isActive } = req.body;
+    const { fullName, carName, experience, phone, rating, isActive } = req.body;
     const data: any = {
       fullName,
       carName,
       experience: experience !== undefined ? Number(experience) : undefined,
       phone,
+      rating: rating !== undefined ? Number(rating) : undefined,
       isActive: isActive !== undefined ? isActive === "true" || isActive === true : undefined,
     };
     if (req.file) data.photo = `/uploads/drivers/${req.file.filename}`;

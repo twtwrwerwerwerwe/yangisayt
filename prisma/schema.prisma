@@ -47,7 +47,7 @@ model Route {
   nameUz            String
   nameRu            String
   nameEn            String
-  image             String
+  travelTime        String   @default("")
   frontSeatPrice    Int
   middleSeatPrice   Int
   backSeatPrice     Int
@@ -65,6 +65,7 @@ model Driver {
   carName        String
   experience     Int
   phone          String
+  rating         Int      @default(5)
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   applicationId  String?  @unique

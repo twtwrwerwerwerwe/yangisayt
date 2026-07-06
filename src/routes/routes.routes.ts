@@ -1,7 +1,6 @@
 import { Router } from "express";
 import prisma from "../utils/prisma";
 import { requireAuth } from "../middleware/auth";
-import { uploadRouteImage } from "../middleware/upload";
 
 const router = Router();
 
@@ -30,9 +29,9 @@ router.get("/:id", async (req, res, next) => {
 });
 
 // Admin: create
-router.post("/", requireAuth, uploadRouteImage, async (req, res, next) => {
+router.post("/", requireAuth, async (req, res, next) => {
   try {
-    const { nameUz, nameRu, nameEn, frontSeatPrice, middleSeatPrice, backSeatPrice, parcelPrice } =
+    const { nameUz, nameRu, nameEn, travelTime, frontSeatPrice, middleSeatPrice, backSeatPrice, parcelPrice } =
       req.body;
 
     const route = await prisma.route.create({
@@ -40,7 +39,7 @@ router.post("/", requireAuth, uploadRouteImage, async (req, res, next) => {
         nameUz,
         nameRu,
         nameEn,
-        image: req.file ? `/uploads/routes/${req.file.filename}` : "",
+        travelTime,
         frontSeatPrice: Number(frontSeatPrice),
         middleSeatPrice: Number(middleSeatPrice),
         backSeatPrice: Number(backSeatPrice),
@@ -55,23 +54,31 @@ router.post("/", requireAuth, uploadRouteImage, async (req, res, next) => {
 });
 
 // Admin: update
-router.put("/:id", requireAuth, uploadRouteImage, async (req, res, next) => {
+router.put("/:id", requireAuth, async (req, res, next) => {
   try {
-    const { nameUz, nameRu, nameEn, frontSeatPrice, middleSeatPrice, backSeatPrice, parcelPrice, isActive } =
-      req.body;
+    const {
+      nameUz,
+      nameRu,
+      nameEn,
+      travelTime,
+      frontSeatPrice,
+      middleSeatPrice,
+      backSeatPrice,
+      parcelPrice,
+      isActive,
+    } = req.body;
 
     const data: any = {
       nameUz,
       nameRu,
       nameEn,
+      travelTime,
       frontSeatPrice: frontSeatPrice !== undefined ? Number(frontSeatPrice) : undefined,
       middleSeatPrice: middleSeatPrice !== undefined ? Number(middleSeatPrice) : undefined,
       backSeatPrice: backSeatPrice !== undefined ? Number(backSeatPrice) : undefined,
       parcelPrice: parcelPrice !== undefined ? Number(parcelPrice) : undefined,
       isActive: isActive !== undefined ? isActive === "true" || isActive === true : undefined,
     };
-
-    if (req.file) data.image = `/uploads/routes/${req.file.filename}`;
 
     const route = await prisma.route.update({ where: { id: req.params.id }, data });
     res.json(route);
